@@ -24,7 +24,17 @@ class TestSerialization(unittest.TestCase):
                 'car': 'honda'
             }
         }
-        assert(expected == dict(iter(datum)))
+        assert(expected == dict(datum))
+
+        # deletion testing
+        del datum['income']
+        del expected['jtara1']['income']
+        assert (dict(datum) == expected)
+
+        # assignment testing
+        datum['phone'] = 'android'
+        expected['jtara1']['phone'] = 'android'
+        assert (expected == dict(datum))
 
 
 if __name__ == '__main__':

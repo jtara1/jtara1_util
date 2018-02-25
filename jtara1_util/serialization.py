@@ -48,13 +48,19 @@ class Serialization:
 class GeneralSchema(Serialization, collections.MutableMapping):
     def __init__(self, data_file, main_key, **kwargs):
         """General Schema (like an abstract class)
-        Create something like this, e.g.:
-        {'video.mp4': {
-            'date': '01-01-2017',
-            'media': ['pic1.jpg', 'pic2.png', 'vid.mp4']
+        Creates something like this:
+
+        .. code-block:: python
+        md = GeneralSchema('~/app.config', 'app_name', version='0.1.0',
+                           'search-engine'='google.com')
+        assert(dict(md) == \
+        {'app_name': {
+            'version': '0.1.0',
+            'search-engine': 'google.com'
             }
-        }
-        end e.g. Where 'video.mp4' is the main key and its value are kwargs
+        })
+
+        end e.g.. Where 'video.mp4' is the main key and its value are kwargs
         """
         Serialization.__init__(self, data_file)
         self.main_key = main_key
@@ -66,38 +72,61 @@ class GeneralSchema(Serialization, collections.MutableMapping):
     deserialize = Serialization.deserialize_from_json  # alias, new ref
 
     def __iter__(self):
-        """Convert this instance to a dictionary"""
-        for k, v in self.data.items():
-            yield k, v
+        """Convert this instance to a dictionary. Only yielding keys"""
+        for key in self.data.keys():
+            yield key
 
     def __getitem__(self, key):
-        """Square brackets operator overriding. e.g.: datum['main_key']"""
+        """Square brackets operator overriding. e.g.: datum['main_key']
+        :param key: key used to find a value in self.data
+        :return: a value from self.data or self.data[self.main_key] \n
+            or self.main_key
+        """
+        # same as using the dot operator to access main_key attr
         if key == 'main_key':
             return self.main_key
+
+        # return the actual datum
+        elif key == self.main_key:
+            return self.data[self.main_key]
+
+        # return {main_key: datum} where datum is dictionary
         return self.data[self.main_key][key]
 
     def __setitem__(self, key, value):
         if key == 'main_key':
             self.main_key = value
-        self.data[self.main_key][key] = value
+        elif key == self.main_key:
+            self.data[self.main_key] = value
+        else:
+            self.data[self.main_key][key] = value
 
     def __delitem__(self, key):
-        del self.data[key]
+        # same as using the dot operator to access main_key attr
+        if key == 'main_key' or key == self.main_key:
+            self.data.clear()
+            self.main_key = None
+
+        # return {main_key: datum} where datum is dictionary
+        else:
+            del self.data[self.main_key][key]
 
     def __len__(self):
-        return len(self.data.keys())
+        return len(self.data['main_key'].keys())
 
     def __eq__(self, other):
         return self.data == other.data
 
     def __hash__(self):
-        return hash(self.data)
+        return hash(self)
 
     def __repr__(self):
+        """:return: string of dictionary of all public attributes"""
         return str(self.__dict__)
 
     def __str__(self):
-        return pformat(dict(iter(self)))
+        """:return: string of self.data (same as dict(self))"""
+        return str(dict(self))
 
 
 if __name__ == '__main__':
