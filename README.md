@@ -4,6 +4,8 @@
 
 can replace with `from loguru import logger` or I'll have to make more specific python modules
 
+I have several personal modules using this.
+
 ## About
 
 Centralized source for common functions and operations I've done throughout multiple modules
