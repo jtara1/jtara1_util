@@ -1,4 +1,11 @@
 # jtara1_util
+
+## Deprecated
+
+can replace with `from loguru import logger` or I'll have to make more specific python modules
+
+## About
+
 Centralized source for common functions and operations I've done throughout multiple modules
 
 This'll included higher level functions for operations done with files and tools
